@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart'; // استيراد مكتبة Flutter لبناء واجهات المستخدم
 import 'package:provider/provider.dart'; // استيراد Provider لإدارة الحالة
+import 'package:url_launcher/url_launcher.dart'; // Add this for launching URLs
 import 'quiz_page.dart'; // استيراد صفحة اللعبة
 import 'info_page.dart'; // استيراد صفحة المعلومات
 import 'video.dart'; // استيراد صفحة الفيديو
@@ -107,6 +108,9 @@ class MainMenu extends StatelessWidget {
                 MainButton(text: "Video about sustainability", onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => VideoPage()));
                 }),
+                MainButton(text: "GPS Locations", onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => GpsPage()));
+                }),
               ],
             ),
           ),
@@ -136,6 +140,72 @@ class MainButton extends StatelessWidget {
         ),
         onPressed: onPressed,
         child: Text(text),
+      ),
+    );
+  }
+}
+
+// New GPS Page with theme support
+class GpsPage extends StatelessWidget {
+  final List<Map<String, String>> locations = [
+    {
+      'name': 'Recycling Center',
+      'url': 'https://www.google.com/maps/search/recycling+center',
+    },
+    {
+      'name': 'Sustainability Organizations',
+      'url': 'https://www.google.com/maps/search/sustainability+organizations',
+    },
+    {
+      'name': 'Farmers Markets',
+      'url': 'https://www.google.com/maps/search/farmers+market',
+    },
+    {
+      'name': 'Public Transportation',
+      'url': 'https://www.google.com/maps/search/public+transportation',
+    },
+  ];
+
+  Future<void> _launchUrl(String url) async {
+    if (!await launchUrl(Uri.parse(url))) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Sustainability Locations'),
+        backgroundColor: Colors.green,
+      ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: ListView.builder(
+        itemCount: locations.length,
+        itemBuilder: (context, index) {
+          final location = locations[index];
+          return Card(
+            margin: EdgeInsets.all(8),
+            color: isDarkMode ? Colors.grey[800] : Colors.white,
+            elevation: 2,
+            child: ListTile(
+              leading: Icon(Icons.location_on, color: Colors.green),
+              title: Text(
+                location['name']!,
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontFamily: 'Verdana',
+                ),
+              ),
+              trailing: Icon(Icons.arrow_forward, 
+                color: isDarkMode ? Colors.white : Colors.black54),
+              onTap: () => _launchUrl(location['url']!),
+            ),
+          );
+        },
       ),
     );
   }
